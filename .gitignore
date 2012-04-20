@@ -1,0 +1,4 @@
+build
+kern/conf/.conftmp*
+kern/compile/ASST*
+

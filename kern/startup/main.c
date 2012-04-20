@@ -62,7 +62,7 @@
  */
 extern const int buildversion;
 extern const char buildconfig[];
-
+extern void hellomofos();
 /*
  * Copyright message for the OS/161 base code.
  */
@@ -205,6 +205,7 @@ kmain(char *arguments)
 {
 	boot();
 
+	hellomofos();
 	menu(arguments);
 
 	/* Should not get here */

@@ -372,9 +372,9 @@ file      syscall/time_syscalls.c
 # Startup and initialization
 #
 
+file 	  startup/hello.c
 file      startup/main.c
 file      startup/menu.c
-
 ########################################
 #                                      #
 #             Filesystems              #
