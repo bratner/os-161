@@ -1,0 +1,133 @@
+defdevice       beep			dev/generic/beep.c
+defdevice	con			dev/generic/console.c
+defdevice       rtclock                 dev/generic/rtclock.c
+defdevice       random                  dev/generic/random.c
+machine mips file    ../common/libc/arch/mips/setjmp.S
+machine mips file    ../common/gcc-millicode/adddi3.c
+machine mips file    ../common/gcc-millicode/anddi3.c
+machine mips file    ../common/gcc-millicode/ashldi3.c
+machine mips file    ../common/gcc-millicode/ashrdi3.c
+machine mips file    ../common/gcc-millicode/cmpdi2.c
+machine mips file    ../common/gcc-millicode/divdi3.c
+machine mips file    ../common/gcc-millicode/iordi3.c
+machine mips file    ../common/gcc-millicode/lshldi3.c
+machine mips file    ../common/gcc-millicode/lshrdi3.c
+machine mips file    ../common/gcc-millicode/moddi3.c
+machine mips file    ../common/gcc-millicode/muldi3.c
+machine mips file    ../common/gcc-millicode/negdi2.c
+machine mips file    ../common/gcc-millicode/notdi2.c
+machine mips file    ../common/gcc-millicode/qdivrem.c
+machine mips file    ../common/gcc-millicode/subdi3.c
+machine mips file    ../common/gcc-millicode/ucmpdi2.c
+machine mips file    ../common/gcc-millicode/udivdi3.c
+machine mips file    ../common/gcc-millicode/umoddi3.c
+machine mips file    ../common/gcc-millicode/xordi3.c
+machine mips file    arch/mips/locore/trap.c	
+machine mips file    arch/mips/thread/cpu.c	
+machine mips file    arch/mips/thread/switch.S	
+machine mips file    arch/mips/thread/switchframe.c	
+machine mips file    arch/mips/thread/thread_machdep.c	
+machine mips file    arch/mips/thread/threadstart.S	
+machine mips file    arch/mips/vm/ram.c		
+machine mips file    vm/copyinout.c		
+defoption   dumbvm
+machine mips optfile dumbvm    arch/mips/vm/dumbvm.c
+machine mips file    arch/mips/syscall/syscall.c	
+platform sys161 file    arch/mips/locore/cache-mips161.S
+platform sys161 file    arch/mips/locore/exception-mips1.S
+platform sys161 file    arch/mips/vm/tlb-mips1.S
+platform sys161 file    arch/sys161/dev/lamebus_machdep.c
+defdevice	lamebus			dev/lamebus/lamebus.c
+defdevice	ltimer			dev/lamebus/ltimer.c
+defattach	ltimer* lamebus*	dev/lamebus/ltimer_att.c
+defdevice	lrandom			dev/lamebus/lrandom.c
+defattach	lrandom* lamebus*	dev/lamebus/lrandom_att.c
+defdevice	lhd			dev/lamebus/lhd.c
+defattach	lhd* lamebus*		dev/lamebus/lhd_att.c
+defdevice	lser			dev/lamebus/lser.c
+defattach	lser* lamebus*		dev/lamebus/lser_att.c
+defdevice	lscreen			dev/lamebus/lscreen.c
+defattach	lscreen* lamebus*	dev/lamebus/lscreen_att.c
+defdevice	lnet			dev/lamebus/lnet.c
+defattach	lnet* lamebus*		dev/lamebus/lnet_att.c
+defdevice	ltrace			dev/lamebus/ltrace.c
+defattach	ltrace* lamebus*	dev/lamebus/ltrace_att.c
+defdevice	emu			dev/lamebus/emu.c
+defattach	emu* lamebus*		dev/lamebus/emu_att.c
+defattach	con0 lser*		dev/lamebus/con_lser.c
+defattach	con0 lscreen*		dev/lamebus/con_lscreen.c
+defattach	beep* ltimer*		dev/lamebus/beep_ltimer.c
+defattach       rtclock* ltimer*        dev/lamebus/rtclock_ltimer.c
+defattach	random0 lrandom*	dev/lamebus/random_lrandom.c
+platform sys161 file    arch/sys161/startup/start.S
+file      lib/array.c
+file      lib/bitmap.c
+file      lib/bswap.c
+file      lib/kgets.c
+file      lib/kprintf.c
+file      lib/misc.c
+file      lib/uio.c
+defoption noasserts
+file      ../common/libc/printf/__printf.c
+file      ../common/libc/printf/snprintf.c
+file      ../common/libc/stdlib/atoi.c
+file      ../common/libc/string/bzero.c
+file      ../common/libc/string/memcpy.c
+file      ../common/libc/string/memmove.c
+file      ../common/libc/string/strcat.c
+file      ../common/libc/string/strchr.c
+file      ../common/libc/string/strcmp.c
+file      ../common/libc/string/strcpy.c
+file      ../common/libc/string/strlen.c
+file      ../common/libc/string/strrchr.c
+file      ../common/libc/string/strtok_r.c
+file      thread/clock.c
+file      thread/spl.c
+file      thread/spinlock.c
+file      thread/synch.c
+file      thread/thread.c
+file      thread/threadlist.c
+file      vm/kmalloc.c
+optofffile dumbvm   vm/addrspace.c
+defoption  net
+file      vfs/device.c
+file      vfs/vfscwd.c
+file      vfs/vfslist.c
+file      vfs/vfslookup.c
+file      vfs/vfspath.c
+file      vfs/vnode.c
+file      vfs/devnull.c
+file      syscall/loadelf.c
+file      syscall/runprogram.c
+file      syscall/time_syscalls.c
+file      startup/main.c
+file      startup/menu.c
+defoption sfs
+optfile   sfs    fs/sfs/sfs_fs.c
+optfile   sfs    fs/sfs/sfs_io.c
+optfile   sfs    fs/sfs/sfs_vnode.c
+defoption netfs
+defoption synchprobs
+optfile   synchprobs  synchprobs/whalemating.c
+file		test/arraytest.c
+file		test/bitmaptest.c
+file		test/threadtest.c
+file		test/tt3.c
+file		test/synchtest.c
+file		test/malloctest.c
+file		test/fstest.c
+optfile net	test/nettest.c
+debug				
+device lamebus0			
+device emu* at lamebus*		
+device ltrace* at lamebus*	
+device ltimer* at lamebus*	
+device lrandom* at lamebus*	
+device lhd* at lamebus*		
+device lser* at lamebus*	
+device beep0 at ltimer*		
+device con0 at lser*		
+device rtclock0 at ltimer*	
+device random0 at lrandom*	
+options sfs			
+options dumbvm			
