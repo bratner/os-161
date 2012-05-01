@@ -18,3 +18,8 @@
 void hellomofos(){
 	kprintf("hello mofos!\n");
 };
+void panic_beatch(){
+	char * a;
+	a = (char *)0;
+	*a='H';
+};
