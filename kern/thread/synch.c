@@ -101,6 +101,16 @@ P(struct semaphore *sem)
         KASSERT(curthread->t_in_interrupt == false);
 
 	spinlock_acquire(&sem->sem_lock);
+
+	if(!threadlist_isempty(&sem->sem_wchan->wc_threads)){
+			/* debugging to see the order of going to sleep */
+			/* threadlist_print(&sem->sem_wchan->wc_threads); */
+			//kprintf("threads are waiting for sem %s\n",sem->sem_name);
+			wchan_lock(sem->sem_wchan);
+                        spinlock_release(&sem->sem_lock);
+                        wchan_sleep(sem->sem_wchan);
+			spinlock_acquire(&sem->sem_lock);
+	}
         while (sem->sem_count == 0) {
 		/*
 		 * Bridge to the wchan lock, so if someone else comes
@@ -118,10 +128,12 @@ P(struct semaphore *sem)
 		 * Exercise: how would you implement strict FIFO
 		 * ordering?
 		 */
-		wchan_lock(sem->sem_wchan);
-		spinlock_release(&sem->sem_lock);
-                wchan_sleep(sem->sem_wchan);
 
+			wchan_lock(sem->sem_wchan);		
+			spinlock_release(&sem->sem_lock);
+                	wchan_sleep(sem->sem_wchan);
+		
+		
 		spinlock_acquire(&sem->sem_lock);
         }
         KASSERT(sem->sem_count > 0);
@@ -164,6 +176,10 @@ lock_create(const char *name)
         }
         
         // add stuff here as needed
+	/*
+		initialize the count to 0 but it is not a sem?
+		what should we do?
+	*/
         
         return lock;
 }

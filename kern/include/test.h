@@ -78,5 +78,7 @@ void menu(char *argstr);
 /* The main function, called from start.S. */
 void kmain(char *bootstring);
 
+/* bratner's additional functions the go here */
+void bratresetjump();
 
 #endif /* _TEST_H_ */

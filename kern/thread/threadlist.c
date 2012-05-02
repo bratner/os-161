@@ -238,3 +238,14 @@ threadlist_remove(struct threadlist *tl, struct thread *t)
 	DEBUGASSERT(tl->tl_count > 0);
 	tl->tl_count--;
 }
+/* print out routine */
+void threadlist_print(struct threadlist * t){
+	struct threadlistnode * tln = &t->tl_head;
+	DEBUGASSERT(tln != NULL);
+	kprintf("\nList of %d threads\n{",t->tl_count);
+	while(tln){
+		kprintf("%p, ",tln->tln_self);
+		tln=tln->tln_next;
+	}
+
+};

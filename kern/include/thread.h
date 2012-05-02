@@ -43,6 +43,13 @@ struct addrspace;
 struct cpu;
 struct vnode;
 
+/* Wait channel. */
+struct wchan {
+	const char *wc_name;		/* name for this channel */
+	struct threadlist wc_threads;	/* list of waiting threads */
+	struct spinlock wc_lock;	/* lock for mutual exclusion */
+};
+
 /* get machine-dependent defs */
 #include <machine/thread.h>
 
