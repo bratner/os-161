@@ -63,6 +63,7 @@
 extern const int buildversion;
 extern const char buildconfig[];
 extern void hellomofos();
+extern void panic_beatch();
 /*
  * Copyright message for the OS/161 base code.
  */
@@ -205,7 +206,6 @@ kmain(char *arguments)
 {
 	boot();
 
-	hellomofos();
 	menu(arguments);
 
 	/* Should not get here */

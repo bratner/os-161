@@ -101,6 +101,16 @@ P(struct semaphore *sem)
         KASSERT(curthread->t_in_interrupt == false);
 
 	spinlock_acquire(&sem->sem_lock);
+
+	if(!threadlist_isempty(&sem->sem_wchan->wc_threads)){
+			/* debugging to see the order of going to sleep */
+			/* threadlist_print(&sem->sem_wchan->wc_threads); */
+			//kprintf("threads are waiting for sem %s\n",sem->sem_name);
+			wchan_lock(sem->sem_wchan);
+                        spinlock_release(&sem->sem_lock);
+                        wchan_sleep(sem->sem_wchan);
+			spinlock_acquire(&sem->sem_lock);
+	}
         while (sem->sem_count == 0) {
 		/*
 		 * Bridge to the wchan lock, so if someone else comes
@@ -118,10 +128,12 @@ P(struct semaphore *sem)
 		 * Exercise: how would you implement strict FIFO
 		 * ordering?
 		 */
-		wchan_lock(sem->sem_wchan);
-		spinlock_release(&sem->sem_lock);
-                wchan_sleep(sem->sem_wchan);
 
+			wchan_lock(sem->sem_wchan);		
+			spinlock_release(&sem->sem_lock);
+                	wchan_sleep(sem->sem_wchan);
+		
+		
 		spinlock_acquire(&sem->sem_lock);
         }
         KASSERT(sem->sem_count > 0);
@@ -163,9 +175,18 @@ lock_create(const char *name)
                 return NULL;
         }
         
-        // add stuff here as needed
-        
-        return lock;
+        lock->lk_wchan = wchan_create(lock->lk_name);
+        if (lock->lk_wchan == NULL) {
+                kfree(lock->lk_name);
+                kfree(lock);
+                return NULL;
+        }
+
+        spinlock_init(&lock->lk_lock);
+        lock->lk_released = 1;
+	lock->lk_thread = NULL;
+
+	return lock;
 }
 
 void
@@ -174,7 +195,8 @@ lock_destroy(struct lock *lock)
         KASSERT(lock != NULL);
 
         // add stuff here as needed
-        
+        spinlock_cleanup(&lock->lk_lock);
+        wchan_destroy(lock->lk_wchan);
         kfree(lock->lk_name);
         kfree(lock);
 }
@@ -183,26 +205,55 @@ void
 lock_acquire(struct lock *lock)
 {
         // Write this
+	KASSERT(lock != NULL);
+	//KASSERT(curthread->t_in_interrupt == false);
+	/* lk_lock ensures mutex over wchan_lock */
+	/* so going to sleep will be a short lived race to go to sleep */
+	spinlock_acquire(&lock->lk_lock); /* exclude other lock seekers starting here */
 
-        (void)lock;  // suppress warning until code gets written
+	if(!threadlist_isempty(&lock->lk_wchan->wc_threads)){
+			/* debugging to see the order of going to sleep */
+			/* threadlist_print(&sem->sem_wchan->wc_threads); */
+			//kprintf("threads are waiting for sem %s\n",sem->sem_name);
+			wchan_lock(lock->lk_wchan);
+                        spinlock_release(&lock->lk_lock); /* other seekers can continue from here, we are going to sleep */
+                        wchan_sleep(lock->lk_wchan);
+			spinlock_acquire(&lock->lk_lock);
+	}
+        while ( lock->lk_released == 0) {
+		wchan_lock(lock->lk_wchan);		
+		spinlock_release(&lock->lk_lock); /*other locked threads will continue here */
+               	wchan_sleep(lock->lk_wchan);
+		/* sleeping .... */	
+		/* somebody woke us up! trying to get the lock. If someone woke several threads up. We get busy wait here. */
+		spinlock_acquire(&lock->lk_lock); /* yet again prevent all other lock seekers from interfering */
+        }
+        KASSERT(lock->lk_released == 1);
+        lock->lk_released = 0;
+	lock->lk_thread = curthread; /* remmember the locking thread for accounting */ 
+	lock->lk_cpu = curcpu;
+	spinlock_release(&lock->lk_lock);
 }
 
 void
 lock_release(struct lock *lock)
 {
-        // Write this
+	KASSERT(lock != NULL);
 
-        (void)lock;  // suppress warning until code gets written
+	spinlock_acquire(&lock->lk_lock);
+
+        lock->lk_released = 1;
+        KASSERT(lock->lk_released == 1);
+	wchan_wakeone(lock->lk_wchan);
+	spinlock_release(&lock->lk_lock);
 }
 
 bool
 lock_do_i_hold(struct lock *lock)
 {
-        // Write this
-
-        (void)lock;  // suppress warning until code gets written
-
-        return true; // dummy until code gets written
+	KASSERT(lock != NULL);
+	return (lock->lk_cpu == curcpu);
+	
 }
 
 ////////////////////////////////////////////////////////////

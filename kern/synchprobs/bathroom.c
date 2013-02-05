@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000, 2001, 2002, 2003, 2004, 2005, 2008, 2009
+ * Copyright (c) 2001, 2002, 2009
  *	The President and Fellows of Harvard College.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,58 +27,70 @@
  * SUCH DAMAGE.
  */
 
-#ifndef _TEST_H_
-#define _TEST_H_
-
 /*
- * Declarations for test code and other miscellaneous high-level
- * functions.
+ * Driver code for bathroom problem
  */
+#include <types.h>
+#include <lib.h>
+#include <thread.h>
+#include <test.h>
 
+#define NPEOPLE 20
 
-/* This is only actually available if OPT_SYNCHPROBS is set. */
-int whalemating(int, char **);
+static
+void
+shower()
+{
+	// The thread enjoys a refreshing shower!
+        clocksleep(1);
+}
 
-/*
- * Test code.
- */
+static
+void
+boy(void *p, unsigned long which)
+{
+	(void)p;
+	kprintf("boy #%ld starting\n", which);
 
-/* lib tests */
-int arraytest(int, char **);
-int bitmaptest(int, char **);
-int queuetest(int, char **);
+	// Implement synchronization
+	shower();
+}
 
-/* thread tests */
-int threadtest(int, char **);
-int threadtest2(int, char **);
-int threadtest3(int, char **);
-int semtest(int, char **);
-int locktest(int, char **);
-int cvtest(int, char **);
+static
+void
+girl(void *p, unsigned long which)
+{
+	(void)p;
+	kprintf("girl #%ld starting\n", which);
 
-/* filesystem tests */
-int fstest(int, char **);
-int readstress(int, char **);
-int writestress(int, char **);
-int writestress2(int, char **);
-int createstress(int, char **);
-int printfile(int, char **);
+	// Implement synchronization
+	shower();
+}
 
-/* other tests */
-int malloctest(int, char **);
-int mallocstress(int, char **);
-int nettest(int, char **);
+// Change this function as necessary
+int
+bathroom(int nargs, char **args)
+{
 
-/* Routine for running a user-level program. */
-int runprogram(char *progname);
+	int i, err=0;
+	
+	(void)nargs;
+	(void)args;
 
-/* Kernel menu system. */
-void menu(char *argstr);
+	for (i = 0; i < NPEOPLE; i++) {
+		switch(i % 2) {
+			case 0:
+			err = thread_fork("Boy Thread",NULL, i, boy, NULL);
+			break;
+			case 1:
+			err = thread_fork("Girl Thread",NULL, i, girl, NULL);
+			break;
+		}
+		if (err) {
+			panic("bathroom: thread_fork failed: %s)\n",
+				strerror(err));
+		}
+	}
 
-/* The main function, called from start.S. */
-void kmain(char *bootstring);
-
-/* bratner's additional functions the go here */
-void bratresetjump();
-
-#endif /* _TEST_H_ */
+	return 0;
+}

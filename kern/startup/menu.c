@@ -454,6 +454,7 @@ static const char *testmenu[] = {
 	"[fs3] FS write stress       (4)     ",
 	"[fs4] FS write stress 2     (4)     ",
 	"[fs5] FS create stress      (4)     ",
+	"[br1] Do a jump to reset 0xBFC00..  ",
 	NULL
 };
 
@@ -565,6 +566,9 @@ static struct {
 	{ "fs3",	writestress },
 	{ "fs4",	writestress2 },
 	{ "fs5",	createstress },
+	
+	/* bratners tests */
+	{ "br1",	bratresetjump },
 
 	{ NULL, NULL }
 };

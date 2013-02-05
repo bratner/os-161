@@ -54,12 +54,6 @@
 /* Magic number used as a guard value on kernel thread stacks. */
 #define THREAD_STACK_MAGIC 0xbaadf00d
 
-/* Wait channel. */
-struct wchan {
-	const char *wc_name;		/* name for this channel */
-	struct threadlist wc_threads;	/* list of waiting threads */
-	struct spinlock wc_lock;	/* lock for mutual exclusion */
-};
 
 /* Master array of CPUs. */
 DECLARRAY(cpu);
@@ -1052,6 +1046,8 @@ wchan_wakeone(struct wchan *wc)
 	/* Lock the channel and grab a thread from it */
 	spinlock_acquire(&wc->wc_lock);
 	target = threadlist_remhead(&wc->wc_threads);
+	/* debugging to see the order of wakups */
+	/* kprintf("\n woke %p \n",target); */
 	/*
 	 * Nobody else can wake up this thread now, so we don't need
 	 * to hang onto the lock.

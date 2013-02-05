@@ -424,4 +424,5 @@ file		test/tt3.c
 file		test/synchtest.c
 file		test/malloctest.c
 file		test/fstest.c
+file		test/brattests.c
 optfile net	test/nettest.c
