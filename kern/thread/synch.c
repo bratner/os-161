@@ -204,30 +204,32 @@ lock_destroy(struct lock *lock)
 void
 lock_acquire(struct lock *lock)
 {
+        int waiting = 0; /* is this thread already in the list */
         // Write this
 	KASSERT(lock != NULL);
-	//KASSERT(curthread->t_in_interrupt == false);
+	KASSERT(curthread->t_in_interrupt == false);
 	/* lk_lock ensures mutex over wchan_lock */
 	/* so going to sleep will be a short lived race to go to sleep */
 	spinlock_acquire(&lock->lk_lock); /* exclude other lock seekers starting here */
+       // kprintf("Start locking for thread %p\n", curthread);
+        //kprintf("Lock is %s\n",lock->lk_released?"released":"locked");
+        
 
-	if(!threadlist_isempty(&lock->lk_wchan->wc_threads)){
-			/* debugging to see the order of going to sleep */
-			/* threadlist_print(&sem->sem_wchan->wc_threads); */
-			//kprintf("threads are waiting for sem %s\n",sem->sem_name);
-			wchan_lock(lock->lk_wchan);
-                        spinlock_release(&lock->lk_lock); /* other seekers can continue from here, we are going to sleep */
-                        wchan_sleep(lock->lk_wchan);
-			spinlock_acquire(&lock->lk_lock);
-	}
-        while ( lock->lk_released == 0) {
-		wchan_lock(lock->lk_wchan);		
+        /* new guys must get in line! unless there is not line */
+        while ( lock->lk_released == 0 || (!threadlist_isempty(&lock->lk_wchan->wc_threads) && !waiting )) {
+                waiting = 1; /* now we are in line */
+		wchan_lock(lock->lk_wchan); /* unlocked by wchan_sleep */		
+       //        kprintf("Lock is held by %p. Going to sleep: %p\n", lock->lk_thread, curthread);               
+   //          threadlist_print(&lock->lk_wchan->wc_threads);
 		spinlock_release(&lock->lk_lock); /*other locked threads will continue here */
                	wchan_sleep(lock->lk_wchan);
 		/* sleeping .... */	
 		/* somebody woke us up! trying to get the lock. If someone woke several threads up. We get busy wait here. */
 		spinlock_acquire(&lock->lk_lock); /* yet again prevent all other lock seekers from interfering */
+         //       kprintf("Woke up and hitting it yet again: %p\n", curthread);
         }
+       // kprintf("Got a lock: %p\n", curthread);
+        //threadlist_print(&lock->lk_wchan->wc_threads);
         KASSERT(lock->lk_released == 1);
         lock->lk_released = 0;
 	lock->lk_thread = curthread; /* remmember the locking thread for accounting */ 
@@ -239,12 +241,14 @@ void
 lock_release(struct lock *lock)
 {
 	KASSERT(lock != NULL);
-
+        
 	spinlock_acquire(&lock->lk_lock);
-
         lock->lk_released = 1;
+        lock->lk_thread = NULL;
         KASSERT(lock->lk_released == 1);
-	wchan_wakeone(lock->lk_wchan);
+	if(!threadlist_isempty(&lock->lk_wchan->wc_threads)){ 
+             wchan_wakeone(lock->lk_wchan);
+        }
 	spinlock_release(&lock->lk_lock);
 }
 
@@ -252,7 +256,7 @@ bool
 lock_do_i_hold(struct lock *lock)
 {
 	KASSERT(lock != NULL);
-	return (lock->lk_cpu == curcpu);
+	return (lock->lk_thread == curthread);
 	
 }
 

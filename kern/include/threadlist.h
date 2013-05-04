@@ -86,6 +86,8 @@ void threadlist_insertbefore(struct threadlist *tl,
 			     struct thread *addee, struct thread *onlist);
 void threadlist_remove(struct threadlist *tl, struct thread *t);
 
+void threadlist_print(struct threadlist * t);
+
 /* Iteration; itervar should previously be declared as (struct thread *) */
 #define THREADLIST_FORALL(itervar, tl) \
 	for ((itervar) = (tl).tl_head.tln_next->tln_self; \

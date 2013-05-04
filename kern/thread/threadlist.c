@@ -242,10 +242,11 @@ threadlist_remove(struct threadlist *tl, struct thread *t)
 void threadlist_print(struct threadlist * t){
 	struct threadlistnode * tln = &t->tl_head;
 	DEBUGASSERT(tln != NULL);
-	kprintf("\nList of %d threads\n{",t->tl_count);
+	kprintf("List of %d threads\n{",t->tl_count);
 	while(tln){
 		kprintf("%p, ",tln->tln_self);
 		tln=tln->tln_next;
 	}
+	kprintf("\n");
 
 };
