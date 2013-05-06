@@ -235,6 +235,7 @@ cvtestthread(void *junk, unsigned long num)
 		lock_acquire(testlock);
 		while (testval1 != num) {
 			gettime(&secs1, &nsecs1);
+           //             kprintf("Thread %lu going to wait for cv.\n", num);
 			cv_wait(testcv, testlock);
 			gettime(&secs2, &nsecs2);
 
@@ -264,8 +265,9 @@ cvtestthread(void *junk, unsigned long num)
 		 * time waiting on the cv.
 		 */
 		for (j=0; j<3000; j++);
-
+	///	kprintf("Thread %lu Broadcasting\n", num);
 		cv_broadcast(testcv, testlock);
+               // kprintf("The lock is %s\n", lock_do_i_hold(testlock)?"mine":"not mine");
 		lock_release(testlock);
 	}
 	V(donesem);
